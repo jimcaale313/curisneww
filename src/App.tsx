@@ -3,474 +3,822 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { 
-  Users, 
-  Send, 
-  Mail, 
-  MapPin, 
-  Globe, 
-  AtSign, 
-  Share2, 
-  Video, 
-  History, 
-  Code, 
-  MousePointerClick,
-  Quote,
-  Instagram,
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  ArrowUpRight,
+  ChevronRight,
+  Clapperboard,
   Facebook,
+  Instagram,
+  Mail,
+  MapPin,
+  Megaphone,
+  Menu,
+  MessageCircle,
+  MonitorSmartphone,
   Music2,
-  ChevronRight
+  Palette,
+  Quote,
+  Send,
+  Sparkles,
+  Users,
+  X
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 
-type View = 'home' | 'contact';
+type View = 'home' | 'about' | 'services' | 'work' | 'serviceDetail';
+type ServiceKey = 'video-production' | 'branding-identity' | 'digital-development' | 'media-strategy';
+type WorkFilter = 'All' | 'Branding' | 'Video' | 'Web';
+
+const services = [
+  {
+    key: 'video-production',
+    icon: <Clapperboard size={34} />,
+    title: 'Video Production',
+    label: 'Video',
+    desc: 'Cinematic campaigns, commercial films, launch videos, event coverage, and social-first edits built for high retention.',
+    details:
+      'From treatment and shot lists to filming, direction, color, sound, and final edits, Curis builds video systems that make your company look trusted, modern, and ready for scale.'
+  },
+  {
+    key: 'branding-identity',
+    icon: <Palette size={34} />,
+    title: 'Branding Identity',
+    label: 'Branding',
+    desc: 'Brand strategy, visual identity, logo systems, type, color, messaging, and launch assets with premium consistency.',
+    details:
+      'We shape the complete identity layer: positioning, tone, visual systems, brand guidelines, campaign assets, and the everyday materials your team needs to show up with confidence.'
+  },
+  {
+    key: 'digital-development',
+    icon: <MonitorSmartphone size={34} />,
+    title: 'Digital Development',
+    label: 'Web',
+    desc: 'Websites, landing pages, product interfaces, app screens, dashboards, and conversion-focused digital experiences.',
+    details:
+      'We design and build fast digital products that turn attention into action, from agency websites and UI/UX systems to apps, portals, and AI-ready workflows.'
+  },
+  {
+    key: 'media-strategy',
+    icon: <Megaphone size={34} />,
+    title: 'Media Strategy',
+    label: 'Strategy',
+    desc: 'Content planning, campaign direction, platform strategy, storytelling systems, and performance-oriented distribution.',
+    details:
+      'We map what to say, where to say it, when to publish, and how to measure progress so brands can build durable trust across social, web, and campaign channels.'
+  }
+] as const;
+
+const workItems = [
+  {
+    title: 'Nomad Foods Launch',
+    tag: 'Branding',
+    img: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1200&q=80',
+    desc: 'Identity system and launch visuals for a consumer brand entering new Somali markets.'
+  },
+  {
+    title: 'Hargeisa Growth Story',
+    tag: 'Video',
+    img: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&w=1200&q=80',
+    desc: 'Cinematic short-form campaign built around founders, community, and local momentum.'
+  },
+  {
+    title: 'Fintech Mobile UX',
+    tag: 'Web',
+    img: 'https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&w=1200&q=80',
+    desc: 'UI/UX direction for onboarding, trust signals, and payment flows.'
+  },
+  {
+    title: 'Creative Market Campaign',
+    tag: 'Video',
+    img: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80',
+    desc: 'Social video package, campaign storyboards, and paid-media cutdowns.'
+  },
+  {
+    title: 'Sahan Studio Identity',
+    tag: 'Branding',
+    img: 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80',
+    desc: 'Premium identity refresh with a refined voice, visual grid, and launch assets.'
+  },
+  {
+    title: 'AI Services Landing Page',
+    tag: 'Web',
+    img: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=80',
+    desc: 'Conversion-focused page for a technical service offer with a sharp proposal flow.'
+  }
+] as const;
+
+const team = [
+  ['Shafi Abokor', 'Brand Identity Designer'],
+  ['Daud Abdirahman', 'Post-Production'],
+  ['Jimcale Haji', 'Web/App Developer'],
+  ['Mahad Abdillahi', 'Production'],
+  ['Sakariye Mohamed', 'Content Writer'],
+  ['Abdiaziz Mohamed', 'Production'],
+  ['Khalid Egal', 'Graphic Designer']
+] as const;
+
+const testimonials = [
+  {
+    quote:
+      'Curis helped us turn a scattered idea into a clean campaign with strategy, visuals, and video that our audience immediately understood.',
+    name: 'Ayan M.',
+    title: 'Founder, Retail Brand'
+  },
+  {
+    quote:
+      'The team brought structure to our story and made our digital presence feel premium without losing the local voice that matters to our customers.',
+    name: 'Mohamed A.',
+    title: 'Operations Lead, Tech Company'
+  },
+  {
+    quote:
+      'From filming to post-production, Curis delivered with calm direction, sharp editing, and a final result that felt ready for serious growth.',
+    name: 'Fadumo H.',
+    title: 'Marketing Manager'
+  },
+  {
+    quote:
+      'Their design thinking made the whole brand easier to explain. We now have a clearer message, stronger assets, and a smoother path for clients.',
+    name: 'Khalid I.',
+    title: 'Director, Service Company'
+  }
+] as const;
+
+const whatsappLink = 'https://wa.me/252633135999';
 
 export default function App() {
   const [view, setView] = useState<View>('home');
+  const [selectedService, setSelectedService] = useState<ServiceKey>('video-production');
+  const [workFilter, setWorkFilter] = useState<WorkFilter>('All');
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 10);
+    onScroll();
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const filteredWork = useMemo(
+    () => workItems.filter((item) => workFilter === 'All' || item.tag === workFilter),
+    [workFilter]
+  );
+
+  const goToView = (nextView: View) => {
+    setMobileOpen(false);
+    setView(nextView);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const openService = (key: ServiceKey) => {
+    setSelectedService(key);
+    goToView('serviceDetail');
+  };
 
   const scrollToSection = (id: string) => {
+    setMobileOpen(false);
     if (view !== 'home') {
       setView('home');
       setTimeout(() => {
-        const element = document.getElementById(id);
-        element?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    } else {
-      const element = document.getElementById(id);
-      element?.scrollIntoView({ behavior: 'smooth' });
+        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 120);
+      return;
     }
+
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  const navButtonClass = (active: boolean) =>
+    `text-sm font-semibold transition-colors ${active ? 'text-gold' : 'text-white/72 hover:text-gold'}`;
+
+  const selected = services.find((service) => service.key === selectedService) ?? services[0];
+
   return (
-    <div className="min-h-screen flex flex-col bg-background-light">
-      {/* Navigation */}
-      <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div 
-            className="flex items-center gap-3 cursor-pointer" 
-            onClick={() => setView('home')}
-          >
-            <div className="w-10 h-10 bg-primary flex items-center justify-center rounded-lg text-white">
-              <Users size={24} />
-            </div>
-            <h1 className="text-2xl font-black tracking-tighter text-primary heading-font">Ca.</h1>
-          </div>
-          
-          <nav className="hidden md:flex items-center gap-10">
-            <button 
-              onClick={() => setView('home')}
-              className={`text-sm font-semibold transition-colors hover:text-primary ${view === 'home' ? 'text-primary' : 'text-slate-600'}`}
-            >
+    <div className="min-h-screen flex flex-col bg-background-dark text-white">
+      <header
+        className={`sticky top-0 z-50 w-full border-b transition-all duration-300 ${
+          isScrolled ? 'bg-background-dark/76 backdrop-blur-xl border-white/10 shadow-2xl shadow-black/20' : 'bg-background-dark/55 backdrop-blur-md border-white/5'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-5 md:px-6 h-20 flex items-center justify-between">
+          <button className="flex items-center gap-3 text-left" onClick={() => goToView('home')} aria-label="Curis Creative Agency home">
+            <span className="w-11 h-11 bg-gold text-background-dark flex items-center justify-center rounded-lg shadow-lg shadow-gold/20">
+              <Users size={23} />
+            </span>
+            <span className="flex flex-col leading-none">
+              <span className="text-lg md:text-xl font-black tracking-tight heading-font">Curis Creative Agency</span>
+              <span className="text-[10px] uppercase tracking-[0.35em] text-white/45 mt-1">Ca.</span>
+            </span>
+          </button>
+
+          <nav className="hidden md:flex items-center gap-9">
+            <button onClick={() => goToView('home')} className={navButtonClass(view === 'home')}>
               Home
             </button>
-            <button 
-              onClick={() => scrollToSection('about')}
-              className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors"
-            >
-              About
-            </button>
-            <button 
-              onClick={() => scrollToSection('services')}
-              className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors"
-            >
+            <button onClick={() => goToView('services')} className={navButtonClass(view === 'services' || view === 'serviceDetail')}>
               Services
             </button>
-            <button 
-              onClick={() => scrollToSection('portfolio')}
-              className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors"
-            >
+            <button onClick={() => goToView('work')} className={navButtonClass(view === 'work')}>
               Work
             </button>
-            <button 
-              onClick={() => setView('contact')}
-              className={`text-sm font-semibold transition-colors hover:text-primary ${view === 'contact' ? 'text-primary' : 'text-slate-600'}`}
-            >
-              Contact
+            <button onClick={() => goToView('about')} className={navButtonClass(view === 'about')}>
+              About
             </button>
           </nav>
-          
-          <button 
-            onClick={() => setView('contact')}
-            className="bg-primary text-white px-6 py-2.5 rounded-lg text-sm font-bold hover:opacity-90 transition-opacity"
-          >
-            Get Started
-          </button>
+
+          <div className="flex items-center gap-3">
+            <button onClick={() => scrollToSection('get-started')} className="btn-gold hidden sm:inline-flex">
+              Get Started
+            </button>
+            <button
+              className="md:hidden w-11 h-11 rounded-lg border border-white/10 flex items-center justify-center text-white"
+              onClick={() => setMobileOpen((open) => !open)}
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X size={21} /> : <Menu size={21} />}
+            </button>
+          </div>
         </div>
+
+        {mobileOpen && (
+          <div className="md:hidden border-t border-white/10 bg-background-dark/95 backdrop-blur-xl px-5 py-4">
+            <div className="flex flex-col gap-4">
+              <button onClick={() => goToView('home')} className="text-left font-semibold text-white">
+                Home
+              </button>
+              <button onClick={() => goToView('services')} className="text-left font-semibold text-white/75">
+                Services
+              </button>
+              <button onClick={() => goToView('work')} className="text-left font-semibold text-white/75">
+                Work
+              </button>
+              <button onClick={() => goToView('about')} className="text-left font-semibold text-white/75">
+                About
+              </button>
+              <button onClick={() => scrollToSection('get-started')} className="btn-gold w-full justify-center mt-2">
+                Get Started
+              </button>
+            </div>
+          </div>
+        )}
       </header>
 
       <main className="flex-grow">
         <AnimatePresence mode="wait">
-          {view === 'home' ? (
+          {view === 'home' && (
             <motion.div
               key="home"
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.4 }}
+              exit={{ opacity: 0, y: -18 }}
+              transition={{ duration: 0.35 }}
             >
-              {/* Hero Section */}
-              <section className="relative bg-accent-blue min-h-[85vh] flex items-center px-6 lg:px-40 py-20">
-                <div className="max-w-4xl">
-                  <motion.h1 
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-white font-heading text-5xl md:text-7xl leading-tight mb-8"
-                  >
-                    Helping brands and institutions speak better in the media.
-                  </motion.h1>
-                  <motion.p 
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="text-white/80 text-lg md:text-xl max-w-2xl mb-12 leading-relaxed"
-                  >
-                    Intentional storytelling that connects your message with the right audience through digital media excellence. Rooted in Hargeisa, delivering for the world.
-                  </motion.p>
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="flex flex-wrap gap-4"
-                  >
-                    <button 
-                      onClick={() => scrollToSection('services')}
-                      className="bg-white text-primary font-bold px-8 py-4 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                      Our Services
-                    </button>
-                    <button 
-                      onClick={() => scrollToSection('portfolio')}
-                      className="border border-white text-white font-bold px-8 py-4 rounded-lg hover:bg-white hover:text-primary transition-colors"
-                    >
-                      View Portfolio
-                    </button>
-                  </motion.div>
-                </div>
-              </section>
-
-              {/* About Section */}
-              <section id="about" className="bg-warm-gray py-24 px-6 lg:px-40">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                  <div>
-                    <h2 className="text-primary font-heading text-3xl md:text-4xl mb-8">A Message from Hargeisa</h2>
-                    <div className="relative pl-8 border-l-4 border-primary/20">
-                      <p className="text-primary/70 italic text-2xl font-light mb-6">
-                        "Our mission is to craft stories that resonate far beyond the screen, rooted in the heart of Hargeisa but speaking to the world."
-                      </p>
-                      <p className="font-bold text-primary uppercase tracking-widest text-sm">— FOUNDER'S NOTE</p>
-                    </div>
-                    <p className="mt-8 text-primary/60 leading-relaxed">
-                      At Curis, we believe every brand has a soul. Our role is to strip away the noise and find the intentional core of your message. We aren't just consultants; we are architects of perception.
-                    </p>
-                  </div>
-                  <div className="rounded-xl overflow-hidden shadow-2xl">
-                    <img 
-                      alt="Workspace" 
-                      className="w-full h-full object-cover grayscale opacity-80 hover:grayscale-0 transition-all duration-700" 
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9hx2Z67gOvsZrZyfWp5QK5hGN8QlPoJXqVrwjypJ_edXLDsacG6d15vEy7rQgZV4JaGB00ztr1rsHWlyOPSnkKjSq7UTnqEOgqEjMolTWOlk6Q810h2lQtlKmZZxK8APLCEu6ClyAQ-tvaNlp4iCrfJEbCsys4xi1c0uMp-SPFnUBm5cODuWUlK7OglUXzk3IEyexxfhBRbr6RLCDctMtUAtxFsjqlEjzsbDhrNjn7Tn06TFTzvA7Np5omcrqPOdIdKHGUjN9g3o"
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
-                </div>
-              </section>
-
-              {/* Process Section */}
-              <section className="py-24 px-6 lg:px-40 bg-white">
-                <div className="mb-16">
-                  <h2 className="text-primary font-heading text-3xl md:text-4xl">Our Process</h2>
-                  <div className="w-20 h-1 bg-primary mt-4"></div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-                  {[
-                    { num: '01', title: 'Discovery', desc: 'In-depth research into your brand identity and media landscape.' },
-                    { num: '02', title: 'Strategy', desc: 'Crafting a bespoke roadmap for intentional narrative delivery.' },
-                    { num: '03', title: 'Production', desc: 'High-end digital creation focusing on cinematic quality.' },
-                    { num: '04', title: 'Impact', desc: 'Measuring resonance and refining the message for longevity.' }
-                  ].map((step, i) => (
-                    <div key={i} className="flex flex-col gap-4">
-                      <span className="text-6xl font-heading text-primary/10">{step.num}</span>
-                      <h3 className="text-xl font-bold">{step.title}</h3>
-                      <p className="text-sm text-primary/60 leading-relaxed">{step.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* Services Section */}
-              <section id="services" className="py-24 px-6 lg:px-40 bg-background-light">
-                <div className="text-center mb-16">
-                  <h2 className="text-primary font-heading text-3xl md:text-4xl">Expertise</h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {[
-                    { icon: <Video className="text-primary" size={40} />, title: 'Video Production', desc: 'Cinematic visual storytelling that captures emotion and drives action.' },
-                    { icon: <History className="text-primary" size={40} />, title: 'Content & Story', desc: 'Editorial-grade copywriting and narrative structuring for modern brands.' },
-                    { icon: <Code className="text-primary" size={40} />, title: 'Digital Dev', desc: 'High-performance digital platforms tailored for media-heavy experiences.' },
-                    { icon: <MousePointerClick className="text-primary" size={40} />, title: 'Media Strategy', desc: 'Consultancy on media relations, positioning, and global distribution.' }
-                  ].map((service, i) => (
-                    <div key={i} className="bg-white border border-primary/10 p-10 rounded-lg hover:shadow-xl transition-shadow">
-                      <div className="mb-4">{service.icon}</div>
-                      <h3 className="text-2xl font-bold mb-4">{service.title}</h3>
-                      <p className="text-primary/60 leading-relaxed">{service.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* Portfolio Section */}
-              <section id="portfolio" className="py-24 bg-white">
-                <div className="px-6 lg:px-40 mb-12">
-                  <h2 className="text-primary font-heading text-3xl md:text-4xl">Featured Work</h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-1">
-                  {[
-                    { 
-                      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuD3ugDjhpjJJenD3xe57TVP7qLx6OOwNp2Gnztp8RQKmSG6X5DLQSO84QScYv6-HL19u-EfPwFY_n3qFtui8hTkhYF_FMg1FJ7YHa0ACH9OS8yFNMh-UypK6_dAEAuVeNt5QD9vwnv9BxSq3iC15M2prnE3ltOyGSp_4ZY3Nqh6QLX9upfnQsfbyHf4MntxvFhcZVxngZ_udyuRPWxRY8IVtY7ySS66FM4LkgIM4JFeBvKgW9g98GTGV7Ao3cndG9FuJfkvxgRqKQQ",
-                      tag: "Video Production",
-                      title: "The Nomad Spirit"
-                    },
-                    { 
-                      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuB7yRL1ubAqTYKLw0OIQrXaLSP01aH76FwvrUq5Qu4-TrdsYl-HeDtnuNG2mBhfGYrWVeT6sL_IkwOuzs-CBKMfszWlU-3Q70nMyAh-g18qdwKB4JWQsCm1F8mdpqqsPssTO-hKG2wQoDTexIrKWaxSFysDm2hGTN02-YJJRUcAIPeEQl9GgP_mddnyEwuQbf32EYTxnpmOykAFE9xuoqeVzqZmx0jVG3v0DvnGKKgSgihdGiCgu6K2Gz7hMHtWMomkjr-d9sIblPA",
-                      tag: "Media Strategy",
-                      title: "Urban Pulse"
-                    },
-                    { 
-                      img: "https://lh3.googleusercontent.com/aida-public/AB6AXuC2nqaz1n8OyO7HN3Ot7NTAXsHnIF38zf_5d4i3sRB4gZi0c7GjJhneMPMjQugXHExT902ijGPmuzSHpF_R1rDCfqM0ghHq2_0blnQ5pJxCBcL4K0TDJ5abnXvkmAMkVgWTnkGSodlbeSmISL-zYXhidNo3j2P7g3kgfpPmqLzOaNMkfCzGbL1XgcKwWy0DWXTARN3hbFEL7KSgrJYSRJpFo1sjSXwylrnSpb91Ea721KO-nfKGUKWerU6A2F3gewdhnt9VpxHf1To",
-                      tag: "Digital Dev",
-                      title: "Global Archive"
-                    }
-                  ].map((item, i) => (
-                    <div key={i} className="relative group h-[400px] overflow-hidden bg-black">
-                      <img 
-                        alt={item.title} 
-                        className="w-full h-full object-cover mubi-grid group-hover:scale-105 transition-transform duration-700" 
-                        src={item.img}
-                        referrerPolicy="no-referrer"
-                      />
-                      <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-8 text-white">
-                        <p className="text-xs font-accent tracking-widest uppercase mb-2">{item.tag}</p>
-                        <h4 className="text-xl font-bold">{item.title}</h4>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
-              {/* Testimonials Section */}
-              <section className="py-24 px-6 lg:px-40 bg-warm-gray overflow-hidden">
-                <div className="max-w-4xl mx-auto text-center">
-                  <Quote className="mx-auto text-primary/30 mb-8" size={48} />
-                  <div className="testimonial-slide">
-                    <p className="text-2xl md:text-3xl font-light text-primary leading-relaxed mb-8">
-                      "Curis Agency transformed how we communicate our values. Their intentionality is unmatched in the region."
-                    </p>
-                    <div>
-                      <h5 className="font-bold text-primary uppercase tracking-widest text-sm">DIRECTOR, HARGEISA TECH HUB</h5>
-                    </div>
-                  </div>
-                </div>
-              </section>
+              <HeroSection scrollToSection={scrollToSection} />
+              <QuickNavigation scrollToSection={scrollToSection} />
+              <ServicesPreview openService={openService} />
+              <ProcessSection />
+              <ExpertiseSection openService={openService} />
+              <WorkPreview goToWork={() => goToView('work')} />
+              <TestimonialsSection />
+              <GetStartedSection />
             </motion.div>
-          ) : (
-            <motion.div
-              key="contact"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.4 }}
-              className="flex items-center justify-center py-12 px-6"
-            >
-              <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-0 overflow-hidden bg-white rounded-2xl shadow-2xl border border-gray-100">
-                {/* Left Side: Contact Form */}
-                <div className="lg:col-span-7 p-8 md:p-16">
-                  <div className="mb-12">
-                    <h2 className="text-4xl md:text-5xl font-black text-slate-900 leading-[1.1] mb-6 heading-font">
-                      Let’s Speak Better Together.
-                    </h2>
-                    <p className="text-slate-500 text-lg">
-                      Tell us about your vision. We help brands in Hargeisa and beyond tell stories that matter.
-                    </p>
-                  </div>
-                  <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-slate-700">Name</label>
-                        <input 
-                          className="w-full h-14 bg-gray-50 border-gray-200 rounded-lg px-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-400" 
-                          placeholder="Your Full Name" 
-                          type="text"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <label className="text-sm font-bold text-slate-700">Organization</label>
-                        <input 
-                          className="w-full h-14 bg-gray-50 border-gray-200 rounded-lg px-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-400" 
-                          placeholder="Company or Entity Name" 
-                          type="text"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-bold text-slate-700">Email</label>
-                      <input 
-                        className="w-full h-14 bg-gray-50 border-gray-200 rounded-lg px-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-400" 
-                        placeholder="professional@email.com" 
-                        type="email"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                      <label className="text-sm font-bold text-slate-700">Your Story/Project</label>
-                      <textarea 
-                        className="w-full bg-gray-50 border-gray-200 rounded-lg p-4 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-slate-400" 
-                        placeholder="How can we help your brand grow?" 
-                        rows={4}
-                      ></textarea>
-                    </div>
-                    <button className="w-full bg-primary text-white h-14 rounded-lg font-bold text-lg hover:bg-primary/90 transition-all flex items-center justify-center gap-2 group" type="submit">
-                      Send Message
-                      <Send size={20} className="group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  </form>
-                </div>
-                {/* Right Side: Contact Details */}
-                <div className="lg:col-span-5 bg-primary p-8 md:p-16 text-white flex flex-col justify-between">
-                  <div className="space-y-12">
-                    <div>
-                      <h3 className="text-2xl font-bold mb-6 heading-font">Contact Information</h3>
-                      <p className="text-white/70 leading-relaxed mb-8">
-                        Our team is ready to discuss your next big idea. We're based in the heart of Hargeisa, serving clients globally.
-                      </p>
-                    </div>
-                    <div className="space-y-8">
-                      <div className="flex items-start gap-4">
-                        <div className="bg-white/10 p-3 rounded-lg">
-                          <Mail size={24} className="text-white" />
-                        </div>
-                        <div>
-                          <p className="text-white/60 text-xs uppercase tracking-widest font-bold mb-1">Email Us</p>
-                          <a className="text-lg font-medium hover:underline underline-offset-4" href="mailto:info@curisagency.com">info@curisagency.com</a>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-4">
-                        <div className="bg-white/10 p-3 rounded-lg">
-                          <MapPin size={24} className="text-white" />
-                        </div>
-                        <div>
-                          <p className="text-white/60 text-xs uppercase tracking-widest font-bold mb-1">Visit Us</p>
-                          <p className="text-lg font-medium">Hargeisa, Somaliland</p>
-                          <p className="text-sm text-white/70">Main Business District, Downtown</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-16 space-y-6">
-                    <p className="text-sm font-medium text-white/70">Need a quick response?</p>
-                    <a className="flex items-center justify-center gap-3 bg-[#25D366] text-white py-4 rounded-xl font-bold text-lg hover:scale-[1.02] transition-transform shadow-lg" href="https://wa.me/252633135999" target="_blank">
-                      <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"></path>
-                      </svg>
-                      WhatsApp Us
-                    </a>
-                  </div>
-                  <div className="mt-12 flex gap-4 opacity-50">
-                    <a 
-                      href="https://www.instagram.com/curisagency/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-full border border-white flex items-center justify-center cursor-pointer hover:bg-white hover:text-primary transition-all"
-                    >
-                      <Instagram size={14} />
-                    </a>
-                    <a 
-                      href="https://www.facebook.com/profile.php?id=100083092734546" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-full border border-white flex items-center justify-center cursor-pointer hover:bg-white hover:text-primary transition-all"
-                    >
-                      <Facebook size={14} />
-                    </a>
-                    <a 
-                      href="https://www.tiktok.com/@curis.creative" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-full border border-white flex items-center justify-center cursor-pointer hover:bg-white hover:text-primary transition-all"
-                    >
-                      <Music2 size={14} />
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+          )}
+
+          {view === 'about' && (
+            <PageShell keyName="about">
+              <AboutPage />
+            </PageShell>
+          )}
+
+          {view === 'services' && (
+            <PageShell keyName="services">
+              <ServicesPage openService={openService} />
+            </PageShell>
+          )}
+
+          {view === 'work' && (
+            <PageShell keyName="work">
+              <WorkPage filteredWork={filteredWork} workFilter={workFilter} setWorkFilter={setWorkFilter} />
+            </PageShell>
+          )}
+
+          {view === 'serviceDetail' && (
+            <PageShell keyName="service-detail">
+              <ServiceDetail service={selected} openService={openService} />
+            </PageShell>
           )}
         </AnimatePresence>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-primary text-white py-20 px-6 lg:px-40" id="contact">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-20">
-          <div className="flex flex-col gap-6">
-            <span className="text-3xl font-black font-accent tracking-tighter">Ca.</span>
-            <p className="text-white/60 text-sm leading-relaxed max-w-xs">
-              Curis Agency is a digital media consultancy focusing on intentionality, quality, and impactful storytelling.
-            </p>
-          </div>
-          <div className="flex flex-col gap-6">
-            <h4 className="font-bold uppercase tracking-widest text-sm">Contact Us</h4>
-            <div className="flex flex-col gap-4">
-              <a className="text-white/80 hover:text-white transition-colors flex items-center gap-2" href="mailto:info@curisagency.com">
-                <Mail size={16} />
-                info@curisagency.com
-              </a>
-              <a className="bg-white/10 hover:bg-white/20 px-4 py-3 rounded flex items-center gap-3 transition-colors w-fit" href="https://wa.me/252633135999">
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
-                +252 633 135 999
-              </a>
-            </div>
-          </div>
-          <div className="flex flex-col gap-6">
-            <h4 className="font-bold uppercase tracking-widest text-sm">Location</h4>
-            <p className="text-white/80 leading-relaxed">
-              Main Office, Jigjiga Yar<br />
-              Hargeisa, Somaliland
-            </p>
-            <div className="flex gap-4">
-              <a 
-                className="w-10 h-10 rounded bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors" 
-                href="https://www.instagram.com/curisagency/"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Instagram size={20} />
-              </a>
-              <a 
-                className="w-10 h-10 rounded bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors" 
-                href="https://www.facebook.com/profile.php?id=100083092734546"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Facebook size={20} />
-              </a>
-              <a 
-                className="w-10 h-10 rounded bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors" 
-                href="https://www.tiktok.com/@curis.creative"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Music2 size={20} />
-              </a>
-            </div>
-          </div>
-        </div>
-        <div className="border-t border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center gap-4 text-white/40 text-xs font-accent uppercase tracking-widest">
-          <p>© 2024 Curis Agency. All Rights Reserved.</p>
-          <div className="flex gap-8">
-            <a className="hover:text-white transition-colors" href="#">Privacy Policy</a>
-            <a className="hover:text-white transition-colors" href="#">Terms of Service</a>
-          </div>
-        </div>
-      </footer>
+      <Footer goToView={goToView} scrollToSection={scrollToSection} />
     </div>
+  );
+}
+
+function PageShell({ children, keyName }: { children: React.ReactNode; keyName: string }) {
+  return (
+    <motion.div
+      key={keyName}
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -18 }}
+      transition={{ duration: 0.35 }}
+      className="bg-background-dark"
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function HeroSection({ scrollToSection }: { scrollToSection: (id: string) => void }) {
+  return (
+    <section id="home" className="relative min-h-[calc(100vh-80px)] overflow-hidden flex items-center px-5 md:px-6">
+      <video
+        className="absolute inset-0 w-full h-full object-cover"
+        autoPlay
+        muted
+        loop
+        playsInline
+        poster="https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1800&q=80"
+      >
+        <source src="https://videos.pexels.com/video-files/3209828/3209828-uhd_2560_1440_25fps.mp4" type="video/mp4" />
+      </video>
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(9,13,18,0.94),rgba(9,13,18,0.72),rgba(9,13,18,0.36))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_20%,rgba(207,172,103,0.18),transparent_32%)]" />
+
+      <div className="relative max-w-7xl mx-auto w-full py-24">
+        <div className="max-w-5xl">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="inline-flex items-center gap-2 text-gold uppercase tracking-[0.32em] text-xs font-bold mb-6"
+          >
+            <Sparkles size={15} />
+            Hargeisa to the world
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className="text-white heading-font text-5xl md:text-7xl lg:text-8xl leading-[0.96] max-w-5xl"
+          >
+            Strategy. Design. Media. AI. Built to scale Somali companies.
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.28 }}
+            className="text-white/72 text-lg md:text-xl max-w-2xl mt-8 leading-relaxed"
+          >
+            Curis Creative Agency builds brand systems, cinematic content, digital products, and media strategy for ambitious companies ready to look and move like market leaders.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.38 }}
+            className="flex flex-wrap gap-4 mt-10"
+          >
+            <button onClick={() => scrollToSection('portfolio')} className="btn-outline">
+              View Work
+              <ArrowUpRight size={18} />
+            </button>
+            <button onClick={() => scrollToSection('get-started')} className="btn-gold">
+              Get Started
+              <ChevronRight size={18} />
+            </button>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function QuickNavigation({ scrollToSection }: { scrollToSection: (id: string) => void }) {
+  return (
+    <section className="bg-background-dark border-y border-white/10 px-5 md:px-6">
+      <div className="max-w-7xl mx-auto py-5 flex flex-wrap gap-3">
+        {[
+          ['Home', 'home'],
+          ['Services', 'services'],
+          ['Work', 'portfolio']
+        ].map(([label, target]) => (
+          <button key={target} onClick={() => scrollToSection(target)} className="quick-tab">
+            {label}
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ServicesPreview({ openService }: { openService: (key: ServiceKey) => void }) {
+  return (
+    <section id="services" className="section-shell bg-ink">
+      <div className="section-heading">
+        <p className="eyebrow">Services</p>
+        <h2>Specialized creative systems for serious growth.</h2>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+        {services.map((service) => (
+          <button key={service.key} onClick={() => openService(service.key)} className="service-card group text-left">
+            <span className="service-icon">{service.icon}</span>
+            <span className="block text-2xl font-bold mt-8 mb-4">{service.title}</span>
+            <span className="block text-white/62 leading-relaxed">{service.desc}</span>
+            <span className="inline-flex items-center gap-2 text-gold font-bold mt-8">
+              Explore
+              <ChevronRight size={17} className="group-hover:translate-x-1 transition-transform" />
+            </span>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ProcessSection() {
+  const steps = [
+    ['01', 'Pre Production', 'Research, strategy, creative direction, scripts, shot lists, production planning, and a clear execution map.'],
+    ['02', 'Production', 'Filming, design sprints, interface creation, campaign builds, content capture, and brand asset production.'],
+    ['03', 'Post Production', 'Editing, refinement, delivery, publishing assets, launch support, and performance feedback loops.']
+  ];
+
+  return (
+    <section className="section-shell bg-background-dark">
+      <div className="section-heading">
+        <p className="eyebrow">Our Process</p>
+        <h2>From idea to finished work with the right pressure at each stage.</h2>
+      </div>
+      <div className="timeline">
+        {steps.map(([num, title, desc], index) => (
+          <div key={num} className="timeline-item">
+            <div className="timeline-dot">{num}</div>
+            {index < steps.length - 1 && <div className="timeline-line" />}
+            <h3 className="text-2xl font-bold mt-8 mb-3">{title}</h3>
+            <p className="text-white/62 leading-relaxed">{desc}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function ExpertiseSection({ openService }: { openService: (key: ServiceKey) => void }) {
+  return (
+    <section className="section-shell bg-ink">
+      <div className="section-heading">
+        <p className="eyebrow">Expertise</p>
+        <h2>Four disciplines, one integrated agency team.</h2>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {services.map((service, index) => (
+          <button key={service.key} onClick={() => openService(service.key)} className="expertise-row group">
+            <span className="text-gold/65 heading-font text-4xl">0{index + 1}</span>
+            <span>
+              <span className="block text-2xl font-bold">{service.title}</span>
+              <span className="block text-white/58 mt-2">{service.details}</span>
+            </span>
+            <ArrowUpRight size={22} className="text-gold shrink-0 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function WorkPreview({ goToWork }: { goToWork: () => void }) {
+  return (
+    <section id="portfolio" className="section-shell bg-background-dark">
+      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12">
+        <div className="section-heading mb-0">
+          <p className="eyebrow">Recent Work</p>
+          <h2>Latest projects shaped for attention, trust, and action.</h2>
+        </div>
+        <button onClick={goToWork} className="btn-outline self-start md:self-end">
+          View All Work
+          <ArrowUpRight size={18} />
+        </button>
+      </div>
+      <WorkGrid items={workItems.slice(0, 6)} />
+    </section>
+  );
+}
+
+function TestimonialsSection() {
+  return (
+    <section className="section-shell bg-ink">
+      <div className="section-heading">
+        <p className="eyebrow">Testimonials</p>
+        <h2>Clients come to Curis for clarity, polish, and momentum.</h2>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+        {testimonials.map((item) => (
+          <article key={item.name} className="testimonial-card">
+            <Quote className="text-gold/55 mb-6" size={34} />
+            <p className="text-white/72 leading-relaxed mb-8">"{item.quote}"</p>
+            <div>
+              <h3 className="font-bold text-white">{item.name}</h3>
+              <p className="text-sm text-white/45">{item.title}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function GetStartedSection() {
+  return (
+    <section id="get-started" className="section-shell bg-background-dark">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="lg:col-span-5">
+          <p className="eyebrow">Get Started</p>
+          <h2 className="heading-font text-4xl md:text-6xl leading-tight mb-6">Start Your Project With Us</h2>
+          <p className="text-white/66 text-lg leading-relaxed mb-8">
+            Tell us what you are building, launching, or improving. We will review the project direction and reply with the next best step.
+          </p>
+          <a className="whatsapp-button" href={whatsappLink} target="_blank" rel="noopener noreferrer">
+            <MessageCircle size={20} />
+            WhatsApp quick contact
+          </a>
+        </div>
+
+        <form className="lg:col-span-7 form-panel" onSubmit={(e) => e.preventDefault()}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <label className="field-label">
+              Name
+              <input className="field-input" type="text" placeholder="Your name" />
+            </label>
+            <label className="field-label">
+              Email
+              <input className="field-input" type="email" placeholder="you@company.com" />
+            </label>
+          </div>
+          <label className="field-label">
+            Project description
+            <textarea className="field-input min-h-40 resize-y py-4" placeholder="What do you want Curis to help you create?" />
+          </label>
+          <button className="btn-gold w-full justify-center" type="submit">
+            Submit Project
+            <Send size={18} />
+          </button>
+        </form>
+      </div>
+    </section>
+  );
+}
+
+function AboutPage() {
+  return (
+    <>
+      <section className="page-hero">
+        <p className="eyebrow">About Curis</p>
+        <h1>Creative direction for companies with bigger ambitions.</h1>
+      </section>
+
+      <section className="section-shell bg-ink pt-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          <div className="lg:col-span-7 space-y-6 text-white/72 text-lg leading-relaxed">
+            <p>
+              Curis Creative Agency is a Hargeisa-based creative company built for the new generation of Somali businesses. We help founders, institutions, and growing teams communicate with more confidence through strategy, brand identity, video production, digital development, and media direction. Our work begins with listening. We study the audience, the market, the offer, and the cultural context behind every project, then translate that understanding into creative systems that are clear, beautiful, and useful.
+            </p>
+            <p>
+              We believe Somali companies deserve the same level of polish, structure, and strategic thinking seen in global markets. That belief shapes how we design logos, plan campaigns, film stories, build websites, write content, and guide a brand's public voice. Curis is not only focused on making things look better; we are focused on making businesses easier to trust, easier to understand, and easier to choose.
+            </p>
+            <p>
+              Our team brings together designers, developers, writers, editors, strategists, and production talent who understand both local realities and international standards. We work with care, speed, and intention, whether the project is a launch film, a full identity system, a landing page, a social campaign, or a long-term media partnership. Curis exists to help ambitious companies scale with a sharper story, stronger visuals, and digital experiences that convert attention into action.
+            </p>
+            <p>
+              Every project is treated as a business tool, not a decoration. We ask what the work must achieve, who it must persuade, and how it should perform after launch. That approach helps clients leave with more than a single campaign; they gain a stronger foundation for future communication. Curis is built for companies that want disciplined creativity, modern execution, and a partner who can connect brand, media, technology, and growth without losing the human story at the center.
+            </p>
+          </div>
+          <div className="lg:col-span-5 about-image">
+            <img
+              alt="Curis creative production workspace"
+              src="https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1000&q=80"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="section-shell bg-background-dark">
+        <div className="section-heading">
+          <p className="eyebrow">Team</p>
+          <h2>The people behind the strategy, design, media, and build.</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {team.map(([name, role], index) => (
+            <article key={name} className="team-card">
+              <div className="team-photo">
+                <span>{name.split(' ').map((part) => part[0]).join('')}</span>
+                <img
+                  alt={`${name} portrait placeholder`}
+                  src={`https://images.unsplash.com/photo-${[
+                    '1507003211169-0a1dd7228f2d',
+                    '1500648767791-00dcc994a43e',
+                    '1506794778202-cad84cf45f1d',
+                    '1531891437562-4301cf35b7e4',
+                    '1531123897727-8f129e1688ce',
+                    '1519085360753-af0119f7cbe7',
+                    '1527980965255-d3b416303d12'
+                  ][index]}?auto=format&fit=crop&w=600&q=80`}
+                />
+              </div>
+              <h3 className="text-xl font-bold mt-5">{name}</h3>
+              <p className="text-gold/80 text-sm font-semibold mt-1">{role}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
+function ServicesPage({ openService }: { openService: (key: ServiceKey) => void }) {
+  return (
+    <>
+      <section className="page-hero">
+        <p className="eyebrow">Services</p>
+        <h1>Strategy, production, identity, and digital work under one roof.</h1>
+      </section>
+      <section className="section-shell bg-ink pt-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {services.map((service) => (
+            <button key={service.key} onClick={() => openService(service.key)} className="service-card min-h-80 group text-left">
+              <span className="service-icon">{service.icon}</span>
+              <span className="block text-3xl font-bold mt-8 mb-4">{service.title}</span>
+              <span className="block text-white/62 leading-relaxed">{service.details}</span>
+              <span className="inline-flex items-center gap-2 text-gold font-bold mt-8">
+                View Details
+                <ChevronRight size={17} className="group-hover:translate-x-1 transition-transform" />
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
+function WorkPage({
+  filteredWork,
+  workFilter,
+  setWorkFilter
+}: {
+  filteredWork: typeof workItems[number][];
+  workFilter: WorkFilter;
+  setWorkFilter: (filter: WorkFilter) => void;
+}) {
+  const filters: WorkFilter[] = ['All', 'Branding', 'Video', 'Web'];
+
+  return (
+    <>
+      <section className="page-hero">
+        <p className="eyebrow">Work</p>
+        <h1>Portfolio work across branding, video, web, and campaign systems.</h1>
+      </section>
+      <section className="section-shell bg-ink pt-0">
+        <div className="flex flex-wrap gap-3 mb-10">
+          {filters.map((filter) => (
+            <button key={filter} onClick={() => setWorkFilter(filter)} className={`filter-pill ${workFilter === filter ? 'is-active' : ''}`}>
+              {filter}
+            </button>
+          ))}
+        </div>
+        <WorkGrid items={filteredWork} />
+      </section>
+    </>
+  );
+}
+
+function ServiceDetail({
+  service,
+  openService
+}: {
+  service: typeof services[number];
+  openService: (key: ServiceKey) => void;
+}) {
+  const deliverables = {
+    'video-production': ['Creative treatment', 'Filming direction', 'Commercial edits', 'Social cutdowns'],
+    'branding-identity': ['Brand strategy', 'Logo systems', 'Guidelines', 'Launch assets'],
+    'digital-development': ['UI/UX design', 'Landing pages', 'Web builds', 'App interfaces'],
+    'media-strategy': ['Campaign planning', 'Content calendars', 'Channel strategy', 'Performance review']
+  }[service.key];
+
+  return (
+    <>
+      <section className="page-hero">
+        <p className="eyebrow">{service.title}</p>
+        <h1>{service.details}</h1>
+      </section>
+      <section className="section-shell bg-ink pt-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-7 detail-panel">
+            <span className="service-icon">{service.icon}</span>
+            <h2 className="heading-font text-4xl md:text-5xl mt-8 mb-5">{service.title}</h2>
+            <p className="text-white/68 text-lg leading-relaxed">{service.desc}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-10">
+              {deliverables.map((item) => (
+                <div key={item} className="deliverable">
+                  <ChevronRight size={17} />
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="lg:col-span-5 side-list">
+            {services.map((item) => (
+              <button key={item.key} onClick={() => openService(item.key)} className={`side-link ${item.key === service.key ? 'is-active' : ''}`}>
+                <span>{item.title}</span>
+                <ArrowUpRight size={17} />
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function WorkGrid({ items }: { items: readonly (typeof workItems[number])[] }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+      {items.map((item) => (
+        <article key={item.title} className="work-card group">
+          <img alt={item.title} src={item.img} />
+          <div className="work-overlay">
+            <p className="text-gold text-xs uppercase tracking-[0.28em] font-bold mb-2">{item.tag}</p>
+            <h3 className="text-2xl font-bold mb-3">{item.title}</h3>
+            <p className="text-white/72 leading-relaxed">{item.desc}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  );
+}
+
+function Footer({
+  goToView,
+  scrollToSection
+}: {
+  goToView: (view: View) => void;
+  scrollToSection: (id: string) => void;
+}) {
+  return (
+    <footer className="bg-black text-white py-16 px-5 md:px-6 border-t border-white/10">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 mb-14">
+        <div>
+          <span className="text-3xl font-black heading-font">Curis Creative Agency</span>
+          <p className="text-white/56 text-sm leading-relaxed max-w-sm mt-5">
+            Strategy, design, media, and AI-ready digital systems for Somali companies ready to scale.
+          </p>
+        </div>
+        <div>
+          <h4 className="font-bold uppercase tracking-[0.28em] text-xs text-gold mb-5">Explore</h4>
+          <div className="flex flex-col gap-3 text-white/72">
+            <button className="footer-link" onClick={() => goToView('home')}>Home</button>
+            <button className="footer-link" onClick={() => goToView('services')}>Services</button>
+            <button className="footer-link" onClick={() => goToView('work')}>Work</button>
+            <button className="footer-link" onClick={() => goToView('about')}>About</button>
+          </div>
+        </div>
+        <div>
+          <h4 className="font-bold uppercase tracking-[0.28em] text-xs text-gold mb-5">Reach Us</h4>
+          <div className="flex flex-col gap-4">
+            <a className="footer-contact" href="mailto:info@curisagency.com">
+              <Mail size={16} />
+              info@curisagency.com
+            </a>
+            <a className="footer-contact" href={whatsappLink} target="_blank" rel="noopener noreferrer">
+              <MessageCircle size={16} />
+              +252 633 135 999
+            </a>
+            <span className="footer-contact">
+              <MapPin size={16} />
+              Hargeisa, Somaliland
+            </span>
+          </div>
+          <div className="flex gap-3 mt-7">
+            <a className="social-link" href="https://www.instagram.com/curisagency/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <Instagram size={18} />
+            </a>
+            <a className="social-link" href="https://www.facebook.com/profile.php?id=100083092734546" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+              <Facebook size={18} />
+            </a>
+            <a className="social-link" href="https://www.tiktok.com/@curis.creative" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+              <Music2 size={18} />
+            </a>
+          </div>
+        </div>
+      </div>
+      <div className="max-w-7xl mx-auto border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between gap-4 text-white/38 text-xs uppercase tracking-[0.22em]">
+        <p>© 2026 Curis Creative Agency. All Rights Reserved.</p>
+        <button className="hover:text-gold transition-colors text-left" onClick={() => scrollToSection('get-started')}>
+          Start a project
+        </button>
+      </div>
+    </footer>
   );
 }
